@@ -62,7 +62,7 @@ class Turret(override var pos: Vector2?):Entity{
     override var img: Texture? = Texture("turret.png")
     override var speed: Vector2? = Vector2(0f, 0f)
     override var health = 100
-    lateinit var target:  Enemy
+    lateinit var target: Enemy
 
 
     var range = 200
@@ -90,14 +90,18 @@ class Turret(override var pos: Vector2?):Entity{
 
 class Enemy(override var pos: Vector2?):Entity{
     override var img: Texture? = Texture("enemy.png")
-    override var speed: Vector2? = Vector2(-4f, 0f)
+    override var speed: Vector2? = Vector2(0f, 0f)
     override var health = 100
+    lateinit var target : Vector2
 
+    var hasTarget = false
     var circ = Circle()
     var power = 10
+    var maxSpeed = 3f
+    var checkpoint = 1
 
     override fun update() {
-        this.circ.set(this.pos, 10f)
+        this.circ.set(this.pos, 4f)
         super.update()
     }
 
@@ -108,7 +112,11 @@ class Enemy(override var pos: Vector2?):Entity{
     fun isDead():Boolean{
         return this.health <= 0
     }
-
+    fun seek(target: Vector2){
+        var des = Vector2(target.x - this.pos!!.x, target.y - this.pos!!.y)
+        des.limit(this.maxSpeed)
+        this.speed = des
+    }
 }
 
 class Bullet(var turret: Turret, var target: Enemy?) :Entity {
@@ -119,10 +127,12 @@ class Bullet(var turret: Turret, var target: Enemy?) :Entity {
     override var health = 100
     var maxSpeed = 10f
     var circ = Circle()
-    var power = 2
+    var power = 25
+    var ttl = 50
 
     override fun update(){
         this.circ.set(this.pos, 10f)
+        this.ttl -= 1
         super.update()
     }
 
@@ -136,6 +146,10 @@ class Bullet(var turret: Turret, var target: Enemy?) :Entity {
         var des = Vector2(target.pos!!.x - this.pos!!.x, target.pos!!.y - this.pos!!.y)
 
         this.speed = this.speed!!.add(des.scl(this.maxSpeed))
+    }
+
+    fun isDead():Boolean{
+        return this.ttl < 0
     }
 
 }
